@@ -22,19 +22,27 @@
 								 class="el-icon-edit"></i></el-button>
 							<el-button type="danger" @click="handleDelete(scope.row.id,scope.$index)" plain :disabled='scope.row.name==="超级管理员"'><i
 								 class="el-icon-delete"></i></el-button>
-							<el-button type="primary" plain icon="el-icon-setting" @click='isShowDialog=true'></el-button>
+							<el-button type="primary" plain icon="el-icon-setting" @click="handleSetting(scope.row.id,scope.$index)"></el-button>
 						</template>
 					</el-table-column>
 				</el-table>
-			</div>	
+			</div>
 		</el-card>
-		<div class="boxright">
-			<el-card>
-				
+		<!-- 设置模态框 -->
+		<div class="layout">
+			<el-card class="box-card box-right" v-show="isShow===true" v-for="(item,index) in options_1st" :key="index">
+				<div slot="header" class="clearfix">
+					<span class="title-color"><i class='el-icon-collection-tag'></i>{{item.name}}</span>
+					<el-switch v-model="item.checked" style="float: right;" @change="toggleAll(item.id,index)"></el-switch>
+				</div>
+				<ul>
+					<li class="listStyle" v-for="(content,idx) in item.children">{{content.name}}
+						<el-switch @change="checkedSingle(content.id,idx,index)" v-model="content.checked" style="float: right;"></el-switch>
+					</li>
+				</ul>
 			</el-card>
-			
 		</div>
-		
+
 	</div>
 </template>
 
@@ -43,14 +51,107 @@
 	export default {
 		data() {
 			return {
+				isShow: false, //右边框框
+				role_id: '', //角色id
+				options_1st: [],
+
 				tableData: [],
 				isShowDialog: false,
+				roleMenu: {
+					menu_id: '',
+					role_id: '',
+				},
 			}
 		},
 		created() {
 			this.loadList();
 		},
+		watch: {
+			'$route'(to, from) {
+				let { id } = to.params;
+				this.loadList(id);
+			}
+		},
 		methods: {
+			// 全选
+			async toggleAll(menu_id, i) {
+				if (this.options_1st[i].checked == false) {
+					this.roleMenu.role_id = this.role_id;
+					this.roleMenu.menu_id = menu_id;
+					let { status, data } = await Power.removemenu(this.roleMenu);
+					for (var j = 0; j < this.options_1st[i].children.length; j++) {
+						this.options_1st[i].children[j].checked = false;
+						var id = this.options_1st[i].children[j].id;
+						this.roleMenu.menu_id = id;
+						let { status, data } = await Power.removemenu(this.roleMenu);
+					}
+				} else {
+					this.roleMenu.role_id = this.role_id;
+					this.roleMenu.menu_id = menu_id;
+					let { status, data } = await Power.addmenu(this.roleMenu);
+					for (var j = 0; j < this.options_1st[i].children.length; j++) {
+						this.options_1st[i].children[j].checked = true;
+						var id = this.options_1st[i].children[j].id;
+						this.roleMenu.menu_id = id;
+						let { status, data } = await Power.addmenu(this.roleMenu);
+					}
+				}
+			},
+			async checkedSingle(menu_id, idx, i) {
+				if (this.options_1st[idx].children[i].checked == false) {
+					this.roleMenu.role_id = this.role_id;
+					this.roleMenu.menu_id = menu_id;
+					let { status, data } = await Power.removemenu(this.roleMenu);
+					var num = 0
+					for (var j = 0; j < this.options_1st[idx].children.length; j++) {
+						if (this.options_1st[idx].children[j].checked == true) {
+							num++;
+						}
+					}
+					if (num >= 1) {
+						this.options_1st[idx].checked = true;
+						var ID = this.options_1st[idx].id;
+						this.roleMenu.menu_id = ID;
+						let { status, data } = await Power.addmenu(this.roleMenu);
+					} else {
+						this.options_1st[idx].checked = false;
+						var ID = this.options_1st[idx].id;
+						this.roleMenu.menu_id = ID;
+						let { status, data } = await Power.removemenu(this.roleMenu);
+					}
+				} else {
+					this.roleMenu.role_id = this.role_id;
+					this.roleMenu.menu_id = menu_id;
+					let { status, data } = await Power.addmenu(this.roleMenu);
+					var num = 0;
+					for (var j = 0; j < this.options_1st[idx].children.length; j++) {
+						if (this.options_1st[idx].children[j].checked === true) {
+							num++;
+						}
+					}
+					if (num >= 1) {
+						this.options_1st[idx].checked = true;
+						var ID = this.options_1st[idx].id;
+						this.roleMenu.menu_id = ID;
+						let { status, data } = await Power.addmenu(this.roleMenu);
+					} else {
+						this.options_1st[idx].checked = false;
+						var ID = this.options_1st[idx].id;
+						this.roleMenu.menu_id = ID;
+						let { status, data } = await Power.removemenu(this.roleMenu);
+					}
+				}
+			},
+			// 根据角色配置获取菜单信息
+			async handleSetting(id, index) {
+				this.isShow = true;
+				this.role_id = id;
+				let { status, data } = await Power.config({ id: id });
+				if (status) {
+					this.options_1st = data;
+				}
+			},
+			//编辑
 			handleEdit(id, name, index) {
 				this.$prompt('请修改信息', '修改', {
 					inputPattern: /\S/,
@@ -67,6 +168,7 @@
 					this.$message.info('取消成功！');
 				});
 			},
+			//删除
 			handleDelete(id, index) {
 				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
 					type: 'warning'
@@ -81,6 +183,7 @@
 					this.$message.info('取消成功')
 				});
 			},
+			//点击添加按钮
 			openInsertModel() {
 				this.$prompt('请输入添加的角色名称', '添加角色', {
 					inputPattern: /\S/,
@@ -109,15 +212,33 @@
 	}
 </script>
 
-<style>
-	.box{
+<style scoped>
+	.box {
 		display: flex;
-		
 	}
-	.boxright{
-		margin-left:20px;
+
+	.box-right {
+		margin-bottom: 10px;
+	}
+
+	.title-color {
+		color: #409eff;
+		font-size: 14px;
+	}
+
+	.layout {
+		display: flex;
+		flex-direction: column;
 		width: calc(100% - 620px);
+		margin-left: 20px;
 	}
+
+	.listStyle {
+		padding: 5px 0;
+		list-style: none;
+		font-size: 14px;
+	}
+
 	.role .text {
 		font-size: 14px;
 	}

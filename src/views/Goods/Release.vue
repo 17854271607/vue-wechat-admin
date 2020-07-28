@@ -102,16 +102,13 @@
 				<div class="gray">商品物流信息</div>
 				<el-form-item label="所在地">
 					<el-select v-model="insertForm.province_id" placeholder="请选择">
-						<el-option v-for="item in province" :key="item.id" :label="item.name" :value="item.province_id">
-						</el-option>
+						<el-option v-for="item in province" :key="item.province_id" :label="item.name" :value="item.province_id"></el-option>
 					</el-select>
-					<el-select v-model="insertForm.province_id" placeholder="请选择">
-						<el-option v-for="item in city" :key="item.id" :label="item.name" :value="item.city_id">
-						</el-option>
+					<el-select v-model="insertForm.city_id" placeholder="请选择">
+						<el-option v-for="item in city" :key="item.city_id" :label="item.name" :value="item.city_id"></el-option>
 					</el-select>
-					<el-select v-model="insertForm.province_id" placeholder="请选择">
-						<el-option v-for="item in county" :key="item.id" :label="item.name" :value="item.county_id">
-						</el-option>
+					<el-select v-model="insertForm.county_id" placeholder="请选择">
+						<el-option v-for="item in county" :key="item.county_id" :label="item.name" :value="item.county_id"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="运费" prop="freight">
@@ -160,7 +157,6 @@
 				textarea: '',
 				action: '/api/upload/goods',
 				insertForm: {
-
 					cate_1st: '',
 					cate_2nd: '',
 					cate_3rd: '',
@@ -179,9 +175,9 @@
 					detail: '',
 					freight: '',
 
-					province_id: '', //省级id
-					city_id: '', //市级id
-					county_id: '', //县级id
+					province_id: '110000000000', //省级id
+					city_id: '110100000000', //市级id
+					county_id: '110101000000', //县级id
 				}, //发布新商品
 				rules: {
 					name: [
@@ -234,20 +230,18 @@
 			//默认第一项
 			this.insertForm.cate_1st = options[0].id;
 
-			// //省市区
-			// let provinceList=await Province.provinceList();
-			// this.province=provinceList.data;
-			// //市级
-			// let cityList=await Province.city({id:this.insertForm.province_id});
-			// this.city=cityList.data;
-			// //县区
-			// let countyList=await Province.county({id:this.insertForm.city_id});
-			// this.county=countyList.data;
 
-				let res = await Province.provinceList();
-				this.province = res.data;
-				this.insertForm.province = res.data[0].province_id;
-			
+
+			//省市区
+			let provinceList = await Province.provinceList();
+			this.province = provinceList.data;
+			//市级
+			let cityList = await Province.city({ id: this.insertForm.province_id });
+			this.city = cityList.data;
+			//县区
+			let countyList = await Province.county({ id: this.insertForm.city_id });
+			this.county = countyList.data;
+
 		},
 		watch: {
 			'insertForm.cate_1st': async function(val) {
@@ -264,24 +258,28 @@
 				//默认第一项
 				this.insertForm.cate_3rd = options[0].id;
 			},
-			'insertForm.province_id': async function(val) {
-				let id = val;
+			//省市区三级
+			'insertForm.province_id': async function(val) { /* 就是Province的id*/
 				//获取市分类
-				let res = await Province.city({ id });
+				let { data, status } = await Province.city({ id: val });
 				//给二级分类数组赋值
-				this.insertForm.city = res.data;
-				this.insertForm.city_id = res.data[0].city_id;
+				if (status) {
+					this.city = data;
+					//根据一级分类的id自动选中二级分类的第一个值,默认选择第一项
+					// this.insertForm.city_id = data[0].id;
+				}
 			},
 			'insertForm.city_id': async function(val) {
-				let id = val;
 				//获取县分类
-				let res = await Province.county({ id });
+				let { status, data } = await Province.county({ id: val });
 				//给三级分类数组赋值
-				this.insertForm.county = res.data;
-				this.insertForm.county_id = res.data[0].county_id;
-
-			}
-
+				this.county = data;
+				if (status) {
+					this.county = data;
+					//根据一级分类的id自动选中二级分类的第一个值,默认选择第一项
+					// this.insertForm.county_id = data[0].id;
+				}
+			},
 		},
 		methods: {
 			handleAvatarSuccess(res, file) {

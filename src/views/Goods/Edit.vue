@@ -71,7 +71,7 @@
 						800*800像素以上，大小不超过1M的正方形图片，上传后的图片将自动保存在图片空间的默认分类中</p>
 				</el-form-item>
 				<el-form-item label="商品轮播图" prop="slider">
-					<el-upload action="/api/upload/slider" :headers="headers" list-type="picture-card" :on-success="sliderSuccess">
+					<el-upload action="/api/upload/slider" :headers="headers" :file-list="photo" list-type="picture-card" :on-success="sliderSuccess">
 						<!-- :on-preview="handlePictureCardPreview" :on-success="sliderSuccess"
 									 :on-remove="handleRemove" -->
 						<i class="el-icon-plus"></i>
@@ -136,15 +136,17 @@
 					Authorization: `Bearer ${sessionStorage.token}`
 				},
 				dialogVisible: false, //轮播图
+				dialogImageUrl: '',
+				photo: [],
 				options: [],
 				options_1st: [],
 				options_2nd: [],
 				options_3rd: [],
 				// 省市区数组
-				province:[],
-				city:[],
-				county:[],
-				
+				province: [],
+				city: [],
+				county: [],
+
 				value: '',
 				imageUrl: '',
 				textarea: '',
@@ -168,10 +170,10 @@
 					brand: '',
 					detail: '',
 					freight: '',
-					
-					province_id:'110000000000',//省级id
-					city_id:'110100000000',//市级id
-					county_id:'110101000000',//县级id
+
+					province_id: '110000000000', //省级id
+					city_id: '110100000000', //市级id
+					county_id: '110101000000', //县级id
 				},
 				rules: {
 					name: [
@@ -242,6 +244,19 @@
 			//获取一级分类
 			let options = await this.loadSubcate(1);
 			this.options_1st = options;
+			//商品详情
+			let id = this.id;
+			let res = await Goods.detail({ id });
+			this.form = res.data;
+			this.form.slider = this.form.slider.split(',');
+			this.form.slider.forEach((item, idx) => {
+				if (item !== "") {
+					this.photo[idx] = {
+						url: item
+					}
+					this.$set(this.photo, idx, this.photo[idx]);
+				}
+			});
 
 		},
 		watch: {
@@ -274,13 +289,20 @@
 			async loadList(id) { /* 加载列表数据 */
 				let { status, data } = await Goods.detail({ id });
 				if (status) {
-					this.insertForm=data;
+					this.insertForm = data;
 					console.log(data);
 					return data;
 				}
 			},
 			//商品轮播图
-			
+			handleRemove(file, fileList) {
+				let src = '';
+				fileList.forEach((item) => {
+					src += (item.url + ',');
+				})
+				this.form.slider = src;
+			},
+
 			handlePictureCardPreview(file) {
 				this.dialogImageUrl = file.url;
 				this.dialogVisible = true;
@@ -300,7 +322,7 @@
 						this.photo[idx] = {
 							url: item
 						}
-						this.$set(this.photo, idx)
+						this.$set(this.photo, idx, this.photo[idx]);
 					}
 				})
 			},

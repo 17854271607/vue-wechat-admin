@@ -29,7 +29,7 @@
 					<el-input v-model="editForm.name" autocomplete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="图片" :label-width="formLabelWidth">
-					<SingleUpload :url='[editForm.img,"avatar"]' @success='handleUploadSuccess($event)' @remove='editForm.img=""'></SingleUpload>
+					<SingleUpload :url='editForm.img' :action='action' @success='handleUploadSuccess($event)' @remove='editForm.img=""'></SingleUpload>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -44,7 +44,7 @@
 					<el-input v-model="insertForm.name" autocomplete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="图片" :label-width="formLabelWidth">
-					<SingleUpload :url='[insertForm.img,"avatar"]' @success='handleUploadSuccessAdd($event)' @remove='insertForm.img=""'></SingleUpload>
+					<SingleUpload :url='insertForm.img' :action='action' @success='handleUploadSuccessAdd($event)' @remove='insertForm.img=""'></SingleUpload>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -65,6 +65,7 @@
 		},
 		data() {
 			return {
+				action:'/api/upload/common',
 				defaultProps: {
 					label: 'name'
 				},

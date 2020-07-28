@@ -15,6 +15,12 @@ let delMenu=(id)=>axios.delete('/api/menu',{params:id});
 let editMenu=(data)=>axios.put("/api/menu",data);
 //添加菜单
 let insertMenu=(data)=>axios.post('/api/menu',data);
+//根据角色配置获取菜单信息
+let config=(id)=>axios.get('/api/role/config',{params:id});
+//为指定角色添加菜单
+let addmenu=(data)=>axios.post('/api/role/menu',data);
+//为指定角色删除菜单
+let removemenu=(data)=>axios.delete('/api/role/menu',data);
 export default{
-	list,insert,remove,edit,menuInfo,delMenu,editMenu,insertMenu
+	list,insert,remove,edit,menuInfo,delMenu,editMenu,insertMenu,config,addmenu,removemenu
 }
