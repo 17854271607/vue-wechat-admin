@@ -1,6 +1,6 @@
 <template>
 	<div class="left-menu">
-		<el-menu class="left" router background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" :collapse="isCollapse">
+		<el-menu :collapse="isCollapse" class="left" router background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
 			<el-submenu index="1">
 				<template slot="title">
 					<i class="el-icon-goods"></i>
@@ -69,7 +69,11 @@
 
 <script>
 	export default {
-		props:['isCollapse'],
+		computed:{
+			isCollapse(){
+				return this.$store.state.isCollapse;
+			}
+		},
 		methods: {
 			handleOpen(key, keyPath) {
 				console.log(key, keyPath);

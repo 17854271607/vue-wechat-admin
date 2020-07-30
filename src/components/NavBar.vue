@@ -2,13 +2,13 @@
 	<div class="navbar">
 		<div class="left">
 			<img src="../assets/img/logo.png" alt="">
-			<i class="el-icon-s-fold" @click="emits"></i>
+			<i class="el-icon-s-fold" @click="toggleCollapse"></i>
 		</div>
 		<div class="right">
-			<el-avatar class='avatar' size='small' :src="ruleForm.avatar"></el-avatar>
+			<el-avatar class='avatar' size='small' :src="avatar"></el-avatar>
 			<el-dropdown>
 				<span class="el-dropdown-link">
-					{{ruleForm.username}}<i class="el-icon-arrow-down el-icon--right"></i>
+					{{fullname}}<i class="el-icon-arrow-down el-icon--right"></i>
 				</span>
 				<el-dropdown-menu slot="dropdown">
 					<el-dropdown-item>消息</el-dropdown-item>
@@ -38,8 +38,19 @@
 				},
 			}
 		},
+		computed:{
+			//获取用户名
+			fullname(){
+				return this.$store.state.profile.fullname;
+			},
+			//获取用户头像
+			avatar(){
+				return this.$store.state.profile.avatar;
+			},
+		},
 		created(){
 			this.loadDetail();
+			this.$store.dispatch('loadInfo');
 		},
 		methods:{
 			//获取用户详情
@@ -50,9 +61,9 @@
 					this.ruleForm=data;
 				}
 			},
-			emits(){
-				this.isShow=!this.isShow;
-				this.$emit('change',this.isShow);
+			//折叠菜单
+			toggleCollapse(){
+				this.$store.commit('handleCollapse');
 			}
 		},
 	}

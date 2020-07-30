@@ -104,7 +104,7 @@
 					}],
 					tel: [{	
 						required: true,
-						pattern:/^1[3456789]\d{10}$/,
+						pattern:/^1[3456789]\d{9}$/,
 						message: '请输入正确的手机号',
 						trigger: 'blur'
 					}]

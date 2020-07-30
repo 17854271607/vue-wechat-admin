@@ -217,47 +217,47 @@
 		display: flex;
 	}
 
-	.box-right {
+	.box .box-right {
 		margin-bottom: 10px;
 	}
 
-	.title-color {
+	.box .title-color {
 		color: #409eff;
 		font-size: 14px;
 	}
 
-	.layout {
+	.box .layout {
 		display: flex;
 		flex-direction: column;
 		width: calc(100% - 620px);
 		margin-left: 20px;
 	}
 
-	.listStyle {
+	.box .listStyle {
 		padding: 5px 0;
 		list-style: none;
 		font-size: 14px;
 	}
 
-	.role .text {
+	.box .role .text {
 		font-size: 14px;
 	}
 
-	.role {
+	.box .role {
 		width: 600px;
 	}
 
-	.role .item {
+	.box .role .item {
 		margin-bottom: 18px;
 	}
 
-	.role .clearfix:before,
-	.role .clearfix:after {
+	.box .role .clearfix:before,
+	.box .role .clearfix:after {
 		display: table;
 		content: "";
 	}
 
-	.role .clearfix:after {
+	.box .role .clearfix:after {
 		clear: both
 	}
 </style>
